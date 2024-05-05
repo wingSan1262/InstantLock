@@ -12,9 +12,11 @@ data class LockStatus(
     var startLock: Boolean,
     var endLock: Long
 ) : Parcelable {
-    fun getRemainingDurationTo(): String {
+    fun getRemainingDurationTo(
+        context: Context
+    ): String {
         val value = endLock - System.currentTimeMillis()
-        val message = value.toMinuteAndSecondFormat()
+        val message = value.toMinuteAndSecondFormat(context)
         return message
     }
 

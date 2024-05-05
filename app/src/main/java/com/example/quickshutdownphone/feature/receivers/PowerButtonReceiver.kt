@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import com.example.quickshutdownphone.MyApp
 import com.example.quickshutdownphone.data.SharedPrefApi
-import com.example.quickshutdownphone.feature.startLockingAndNotify
+import com.example.quickshutdownphone.feature.checkJobAndSaveLockStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -14,6 +14,9 @@ import kotlinx.coroutines.launch
 
 
 enum class ShutdownType(val duration: Int) {
+    NONE(
+        0
+    ),
     QUICK_5_MINUTES(
 //        5
         5 * 60
@@ -24,24 +27,17 @@ enum class ShutdownType(val duration: Int) {
     ),
     LONG_20_MINUTES(
 //        15
-        30 * 60
+        20 * 60
     ),
+    NIGHT_4HOUR_TIME(
+        4 * 60 * 60
+    )
 }
 class PowerButtonReceiver(
     val myApp: MyApp = MyApp.getInstance(),
     val sharedPrefApi: SharedPrefApi = myApp.sharedPrefApi,
 ): BroadcastReceiver() {
 
-    fun checkAndSaveLockStatus(
-        context: Context,
-        type: ShutdownType
-    ){
-        lockerJob?.cancel()
-        lockerJob = CoroutineScope(Dispatchers.Main).launch {
-            delay(2000)
-            context.startLockingAndNotify(sharedPrefApi, type)
-        }
-    }
 
     fun resetJobCounter(){
         jobCounter?.cancel()
@@ -55,11 +51,11 @@ class PowerButtonReceiver(
         if (Intent.ACTION_SCREEN_OFF == intent.action || Intent.ACTION_SCREEN_ON == intent.action) {
             countPowerOff++
             if (countPowerOff >= 4 && countPowerOff <= 5) {
-                checkAndSaveLockStatus(context, ShutdownType.QUICK_5_MINUTES)
+                lockerJob = context.checkJobAndSaveLockStatus(ShutdownType.QUICK_5_MINUTES, sharedPrefApi, lockerJob)
             } else if (countPowerOff > 6 && countPowerOff <= 7) {
-                checkAndSaveLockStatus(context, ShutdownType.MEDIUM_10_MINUTES)
+                lockerJob = context.checkJobAndSaveLockStatus(ShutdownType.MEDIUM_10_MINUTES, sharedPrefApi, lockerJob)
             } else if (countPowerOff >= 8) {
-                checkAndSaveLockStatus(context, ShutdownType.LONG_20_MINUTES)
+                lockerJob = context.checkJobAndSaveLockStatus(ShutdownType.LONG_20_MINUTES, sharedPrefApi, lockerJob)
             }
             resetJobCounter()
         }

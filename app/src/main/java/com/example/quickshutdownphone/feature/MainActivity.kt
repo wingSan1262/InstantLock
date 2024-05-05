@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,40 +24,38 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
-import coil.size.Size
 import com.example.quickshutdownphone.R
+import com.example.quickshutdownphone.feature.widget.AutoSpecificInstruction
 import com.example.quickshutdownphone.ui.theme.Green_4CAF50
 import com.example.quickshutdownphone.ui.theme.QuickShutdownPhoneTheme
 
@@ -84,10 +83,12 @@ class MainActivity : ComponentActivity() {
                         ) {
                             isPermissionGrantedAll = true
                         }
-                    else
+                    else{
                         InstructionComponent() {
                             this.finish()
                         }
+                        startSingleAllBroadcastStarters()
+                    }
                 }
             }
         }
@@ -144,7 +145,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(40.dp))
         if (!isIntroductionDone) {
             Text(
-                text = "Welcome to Instant Lockdown",
+                text = stringResource(R.string.welcome_message),
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 fontSize = 24.sp,
@@ -160,7 +161,7 @@ fun SettingsScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Instant Lockdown is designed to help you focus and combat digital distractions. It allows you to instantly lock your phone for a set period of time.",
+                text = stringResource(R.string.welcome_description),
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 32.dp)
@@ -172,11 +173,11 @@ fun SettingsScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 32.dp)
             ) {
-                Text(text = "Continue to Setup")
+                Text(text = stringResource(R.string.continue_to_setup))
             }
         } else {
             Text(
-                text = "Setup Access and permission",
+                text = stringResource(R.string.setup_access_and_permission),
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 fontSize = 24.sp,
@@ -184,7 +185,7 @@ fun SettingsScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Before you can lockdown your phone instantly. You need to setup few things.",
+                text = stringResource(R.string.lockdown_instruction_title),
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 8.dp)
@@ -194,8 +195,8 @@ fun SettingsScreen(
                 ListItem(
                     headlineContent = {
                         Text(
-                            if (isHaveNotificationPermission) "Notification permission granted"
-                            else "Need notification permission"
+                            if (isHaveNotificationPermission) stringResource(R.string.notification_permission_granted)
+                            else stringResource(R.string.need_notification_permission)
                         )
                     },
                     trailingContent = {
@@ -212,7 +213,7 @@ fun SettingsScreen(
                             Button(onClick = {
                                 context.requestNotificationAccess()
                             }) {
-                                Text(text = "Grant")
+                                Text(text = stringResource(R.string.grant))
                             }
                     },
                 )
@@ -220,8 +221,8 @@ fun SettingsScreen(
             ListItem(
                 headlineContent = {
                     Text(
-                        if (isHaveOverlayPerm) "Overlay permission granted"
-                        else "Need overlay permission"
+                        if (isHaveOverlayPerm) stringResource(R.string.overlay_permission_granted)
+                        else stringResource(R.string.need_overlay_permission)
                     )
                 },
                 trailingContent = {
@@ -239,7 +240,7 @@ fun SettingsScreen(
                             onClick = {
                                 context.openOverlayPermissionSetting()
                             }) {
-                            Text(text = "Grant")
+                            Text(text = stringResource(id = R.string.grant))
                         }
                 },
             )
@@ -247,8 +248,8 @@ fun SettingsScreen(
             ListItem(
                 headlineContent = {
                     Text(
-                        if (isHaveAdminPermission) "Admin permission granted"
-                        else "Need admin permission"
+                        if (isHaveAdminPermission) stringResource(R.string.admin_permission_granted)
+                        else stringResource(R.string.need_admin_permission)
                     )
                 },
                 trailingContent = {
@@ -266,7 +267,7 @@ fun SettingsScreen(
                             onClick = {
                                 context.openAdminPermissionSetting()
                             }) {
-                            Text(text = "Grant")
+                            Text(text = stringResource(id = R.string.grant))
                         }
                 },
             )
@@ -289,45 +290,53 @@ fun InstructionComponent(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Your Device is Ready for Instant Lock",
+            text = stringResource(R.string.your_device_is) +
+                    (if(context.isManufactureAdditionalSetting())
+                        stringResource(R.string.almost) else "") +
+                    stringResource(R.string.ready_for_instant_lock),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(24.dp))
-        val imageLoader = ImageLoader.Builder(context)
-            .components {
-                if (SDK_INT >= 28) {
-                    add(ImageDecoderDecoder.Factory())
-                } else {
-                    add(GifDecoder.Factory())
-                }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp)
+                .clip(CircleShape),
+            horizontalArrangement = Arrangement.Center
+        ){
+            Card(
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+            ){
+                Image(
+                    painter = painterResource(id = R.drawable.baseline_lock_clock_24),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    alignment = Alignment.Center
+                )
             }
-            .build()
-        Image(
-            painter = rememberAsyncImagePainter(
-                ImageRequest.Builder(context).data(data = R.drawable.phone_lock).apply(block = {
-                    size(260, 260)
-                }).build(), imageLoader = imageLoader
-            ),
-            contentDescription = null,
-            modifier = Modifier.fillMaxWidth(),
-            alignment = Alignment.Center
-        )
-        Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
         Text(
             textAlign = TextAlign.Justify,
-            text = "To do Instant Lockdown, you need to press the power button with a 0.2-second interval multiple times. You can do this on any state as long the phone is on.",
+            text = stringResource(R.string.lockdown_remark),
             fontSize = 16.sp
         )
         Spacer(modifier = Modifier.height(32.dp))
-        Text(text = "Operations:", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Text(text = stringResource(R.string.operations), fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "1. Press 4 times for a 5-minute lock.", fontSize = 16.sp)
+        Text(text = stringResource(R.string.instruction_no_one), fontSize = 16.sp)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "2. Press 6 times for a 10-minute lock.", fontSize = 16.sp)
+        Text(text = stringResource(R.string.instruction_dialog_shown), fontSize = 16.sp)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "3. Press > 8 times for a 30-minute lock.", fontSize = 16.sp)
-        Spacer(modifier = Modifier.height(24.dp))
+        Text(text = stringResource(R.string.minute_lock_instruction), fontSize = 16.sp)
+        Spacer(modifier = Modifier.height(16.dp))
+
         Row(
             verticalAlignment = Alignment.CenterVertically
         ){
@@ -337,18 +346,29 @@ fun InstructionComponent(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "You cannot cancel the lock once started.",
+                text = stringResource(R.string.cannot_cancel_lock),
                 fontSize = 14.sp
             )
         }
+        if (context.isManufactureAdditionalSetting()) {
+            Spacer(modifier = Modifier.height(32.dp))
+            AutoSpecificInstruction()
+        }
+
         Spacer(modifier = Modifier.height(52.dp))
+        Text(
+            modifier =  Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            text = stringResource(R.string.widget_will_reappear),
+            fontSize = 14.sp
+        )
         Button(
             onClick = { closeApp() },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp)
         ) {
-            Text(text = "Use Phone and Start Locking")
+            Text(text = stringResource(R.string.close_and_start))
         }
     }
 }
