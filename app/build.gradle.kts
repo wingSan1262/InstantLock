@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.quickshutdownphone"
+    namespace = "com.risyan.quickshutdownphone"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.quickshutdownphone"
+        applicationId = "com.risyan.quickshutdownphone"
         minSdk = 24
         targetSdk = 34
         versionCode = 2

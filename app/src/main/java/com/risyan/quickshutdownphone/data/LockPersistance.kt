@@ -1,10 +1,10 @@
-package com.example.quickshutdownphone.data
+package com.risyan.quickshutdownphone.data
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import android.content.Context
 import android.content.SharedPreferences
-import com.example.quickshutdownphone.feature.toMinuteAndSecondFormat
+import com.risyan.quickshutdownphone.feature.toMinuteAndSecondFormat
 import com.google.gson.Gson
 
 @Parcelize
@@ -24,7 +24,7 @@ data class LockStatus(
 
 class SharedPrefApi(context: Context) {
 
-    private val PREFS_NAME = "com.example.quickshutdownphone"
+    private val PREFS_NAME = "com.risyan.quickshutdownphone"
     private val LOCK_STATUS_KEY = "lock_status"
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 

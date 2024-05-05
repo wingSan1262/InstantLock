@@ -1,4 +1,4 @@
-package com.example.quickshutdownphone.feature.widget
+package com.risyan.quickshutdownphone.feature.widget
 
 import android.os.Build.VERSION.SDK_INT
 import androidx.compose.foundation.Image
@@ -29,19 +29,19 @@ import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
-import com.example.quickshutdownphone.R
-import com.example.quickshutdownphone.feature.autoLaunchHonorSetting
-import com.example.quickshutdownphone.feature.autoLaunchLetvSetting
-import com.example.quickshutdownphone.feature.autoLaunchOppoSetting
-import com.example.quickshutdownphone.feature.autoLaunchVivoSetting
-import com.example.quickshutdownphone.feature.autoLaunchXiaomiSetting
-import com.example.quickshutdownphone.feature.isHonorDevice
-import com.example.quickshutdownphone.feature.isHuaweiDevice
-import com.example.quickshutdownphone.feature.isLetvDevice
-import com.example.quickshutdownphone.feature.isOppoDevice
-import com.example.quickshutdownphone.feature.isVivoDevice
-import com.example.quickshutdownphone.feature.isXiaomiDevice
-import com.example.quickshutdownphone.feature.openUrl
+import com.risyan.quickshutdownphone.R
+import com.risyan.quickshutdownphone.feature.autoLaunchHonorSetting
+import com.risyan.quickshutdownphone.feature.autoLaunchLetvSetting
+import com.risyan.quickshutdownphone.feature.autoLaunchOppoSetting
+import com.risyan.quickshutdownphone.feature.autoLaunchVivoSetting
+import com.risyan.quickshutdownphone.feature.autoLaunchXiaomiSetting
+import com.risyan.quickshutdownphone.feature.isHonorDevice
+import com.risyan.quickshutdownphone.feature.isHuaweiDevice
+import com.risyan.quickshutdownphone.feature.isLetvDevice
+import com.risyan.quickshutdownphone.feature.isOppoDevice
+import com.risyan.quickshutdownphone.feature.isVivoDevice
+import com.risyan.quickshutdownphone.feature.isXiaomiDevice
+import com.risyan.quickshutdownphone.feature.openUrl
 
 @Composable
 fun AutoSpecificInstruction() {

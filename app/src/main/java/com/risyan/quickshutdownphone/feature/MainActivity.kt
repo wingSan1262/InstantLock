@@ -1,4 +1,4 @@
-package com.example.quickshutdownphone.feature
+package com.risyan.quickshutdownphone.feature
 
 import android.content.Context
 import android.os.Build
@@ -54,10 +54,10 @@ import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
-import com.example.quickshutdownphone.R
-import com.example.quickshutdownphone.feature.widget.AutoSpecificInstruction
-import com.example.quickshutdownphone.ui.theme.Green_4CAF50
-import com.example.quickshutdownphone.ui.theme.QuickShutdownPhoneTheme
+import com.risyan.quickshutdownphone.R
+import com.risyan.quickshutdownphone.feature.widget.AutoSpecificInstruction
+import com.risyan.quickshutdownphone.ui.theme.Green_4CAF50
+import com.risyan.quickshutdownphone.ui.theme.QuickShutdownPhoneTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -368,7 +368,10 @@ fun InstructionComponent(
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp)
         ) {
-            Text(text = stringResource(R.string.close_and_start))
+            Text(
+                textAlign = TextAlign.Center,
+                text = stringResource(R.string.close_and_start)
+            )
         }
     }
 }

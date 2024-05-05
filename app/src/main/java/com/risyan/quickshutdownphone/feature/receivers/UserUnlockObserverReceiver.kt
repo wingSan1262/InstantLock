@@ -1,12 +1,12 @@
-package com.example.quickshutdownphone.feature.receivers
+package com.risyan.quickshutdownphone.feature.receivers
 
 import android.app.admin.DeviceAdminReceiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.example.quickshutdownphone.MyApp
-import com.example.quickshutdownphone.data.SharedPrefApi
-import com.example.quickshutdownphone.feature.reLockAndNotify
+import com.risyan.quickshutdownphone.MyApp
+import com.risyan.quickshutdownphone.data.SharedPrefApi
+import com.risyan.quickshutdownphone.feature.reLockAndNotify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

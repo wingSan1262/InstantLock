@@ -1,4 +1,4 @@
-package com.example.quickshutdownphone
+package com.risyan.quickshutdownphone
 
 import org.junit.Test
 

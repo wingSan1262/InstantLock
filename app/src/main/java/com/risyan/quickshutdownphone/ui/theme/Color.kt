@@ -1,4 +1,4 @@
-package com.example.quickshutdownphone.ui.theme
+package com.risyan.quickshutdownphone.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

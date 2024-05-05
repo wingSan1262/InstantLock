@@ -1,12 +1,12 @@
-package com.example.quickshutdownphone
+package com.risyan.quickshutdownphone
 
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import com.example.quickshutdownphone.data.SharedPrefApi
-import com.example.quickshutdownphone.feature.startSingleAllBroadcastStarters
+import com.risyan.quickshutdownphone.data.SharedPrefApi
+import com.risyan.quickshutdownphone.feature.startSingleAllBroadcastStarters
 
 class MyApp : Application() {
     val sharedPrefApi: SharedPrefApi by lazy {

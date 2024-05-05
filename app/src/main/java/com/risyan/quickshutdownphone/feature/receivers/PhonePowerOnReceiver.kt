@@ -1,9 +1,9 @@
-package com.example.quickshutdownphone.feature.receivers
+package com.risyan.quickshutdownphone.feature.receivers
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.example.quickshutdownphone.feature.startSingleAllBroadcastStarters
+import com.risyan.quickshutdownphone.feature.startSingleAllBroadcastStarters
 
 class PhonePowerOnReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {

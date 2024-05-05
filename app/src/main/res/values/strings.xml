@@ -22,7 +22,7 @@
     <string name="need_overlay_permission">Need overlay permission</string>
     <string name="admin_permission_granted">Admin permission granted</string>
     <string name="need_admin_permission">Need admin permission</string>
-    <string name="your_device_is">"Your Device is "</string>
+    <string name="your_device_is">"Your Device is"</string>
     <string name="almost">almost</string>
     <string name="ready_for_instant_lock">" ready for Instant Lock"</string>
     <string name="lockdown_remark">Instant Lockdown allows you to lock your phone instantly. It also features a nighttime lockdown from 21:30 to 01:30.</string>

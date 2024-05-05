@@ -1,4 +1,4 @@
-package com.example.quickshutdownphone.feature
+package com.risyan.quickshutdownphone.feature
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -32,14 +32,14 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import com.example.quickshutdownphone.R
-import com.example.quickshutdownphone.data.LockStatus
-import com.example.quickshutdownphone.data.SharedPrefApi
-import com.example.quickshutdownphone.feature.receivers.MyAdmin
-import com.example.quickshutdownphone.feature.receivers.NightTimeReceiver
-import com.example.quickshutdownphone.feature.receivers.ShutdownType
-import com.example.quickshutdownphone.feature.services.ReceiverSetupService
-import com.example.quickshutdownphone.feature.widget.LockWidget
+import com.risyan.quickshutdownphone.R
+import com.risyan.quickshutdownphone.data.LockStatus
+import com.risyan.quickshutdownphone.data.SharedPrefApi
+import com.risyan.quickshutdownphone.feature.receivers.MyAdmin
+import com.risyan.quickshutdownphone.feature.receivers.NightTimeReceiver
+import com.risyan.quickshutdownphone.feature.receivers.ShutdownType
+import com.risyan.quickshutdownphone.feature.services.ReceiverSetupService
+import com.risyan.quickshutdownphone.feature.widget.LockWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

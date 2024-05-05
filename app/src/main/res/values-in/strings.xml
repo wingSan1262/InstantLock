@@ -22,7 +22,7 @@
     <string name="need_overlay_permission">Perlu izin overlay</string>
     <string name="admin_permission_granted">Izin admin diberikan</string>
     <string name="need_admin_permission">Perlu izin admin</string>
-    <string name="your_device_is">"Perangkat Anda adalah "</string>
+    <string name="your_device_is">"Perangkat anda"</string>
     <string name="almost">hampir</string>
     <string name="ready_for_instant_lock">" siap untuk Lockdown Instan"</string>
     <string name="lockdown_remark">Lockdown Instan memungkinkan Anda untuk mengunci telepon Anda secara instan. Ini juga memiliki fitur lockdown malam hari dari 21:30 hingga 01:30.</string>

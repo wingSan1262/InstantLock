@@ -1,4 +1,4 @@
-package com.example.quickshutdownphone.feature.widget
+package com.risyan.quickshutdownphone.feature.widget
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,8 +9,8 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.example.quickshutdownphone.databinding.LockWidgetOverlayBinding
-import com.example.quickshutdownphone.feature.receivers.ShutdownType
+import com.risyan.quickshutdownphone.databinding.LockWidgetOverlayBinding
+import com.risyan.quickshutdownphone.feature.receivers.ShutdownType
 import kotlinx.coroutines.*
 
 
