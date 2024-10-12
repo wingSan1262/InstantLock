@@ -12,9 +12,9 @@ import com.risyan.quickshutdownphone.R
 import com.risyan.quickshutdownphone.data.SharedPrefApi
 import com.risyan.quickshutdownphone.feature.checkJobAndSaveLockStatus
 import com.risyan.quickshutdownphone.feature.createOverlay
+import com.risyan.quickshutdownphone.feature.hasAccessibilityService
 import com.risyan.quickshutdownphone.feature.hasAdminPermission
 import com.risyan.quickshutdownphone.feature.hasNotificationAccess
-import com.risyan.quickshutdownphone.feature.hasOverlayPermission
 import com.risyan.quickshutdownphone.feature.reLockAndNotify
 import com.risyan.quickshutdownphone.feature.receivers.PowerButtonReceiver
 import com.risyan.quickshutdownphone.feature.receivers.ShutdownType
@@ -61,7 +61,7 @@ class ReceiverSetupService(
         }
         addPeriodicServiceStarter()
 
-        if(hasAdminPermission() && hasNotificationAccess() && hasOverlayPermission() && firstTime){
+        if(hasAdminPermission() && hasNotificationAccess() && hasAccessibilityService() && firstTime){
             createOverlay({
                 checkJobAndSaveLockStatus(ShutdownType.QUICK_5_MINUTES, sharedPrefApi)
             }){

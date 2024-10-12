@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -65,25 +66,22 @@ class MainActivity : ComponentActivity() {
         setContent {
             QuickShutdownPhoneTheme {
                 var isPermissionGrantedAll by remember {
-                    mutableStateOf(hasAdminPermission() && hasNotificationAccess() && hasOverlayPermission())
+                    mutableStateOf(hasAdminPermission() && hasNotificationAccess() && hasAccessibilityService())
                 }
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    if (
-                        !isPermissionGrantedAll
-                    )
-                        SettingsScreen(
-                            isNeedNotificaiton = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
-                            isHaveNotificationAccess = hasNotificationAccess(),
-                            isHaveAdminAccess = hasAdminPermission(),
-                            isHaveOverlayPermission = hasOverlayPermission()
-                        ) {
-                            isPermissionGrantedAll = true
-                        }
-                    else{
+                    if (!isPermissionGrantedAll) SettingsScreen(
+                        isNeedNotificaiton = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
+                        isHaveNotificationAccess = hasNotificationAccess(),
+                        isHaveAdminAccess = hasAdminPermission(),
+                        isHaveAcessibiltyService = hasAccessibilityService(),
+                        isHaveStorageAccess = hasStorageAccess()
+                    ) {
+                        isPermissionGrantedAll = true
+                    }
+                    else {
                         InstructionComponent() {
                             this.finish()
                         }
@@ -102,7 +100,8 @@ fun SettingsScreen(
     isNeedNotificaiton: Boolean = false,
     isHaveNotificationAccess: Boolean = false,
     isHaveAdminAccess: Boolean = false,
-    isHaveOverlayPermission: Boolean = false,
+    isHaveAcessibiltyService: Boolean = false,
+    isHaveStorageAccess: Boolean = false,
     onDone: () -> Unit = {}
 ) {
 
@@ -111,12 +110,16 @@ fun SettingsScreen(
         mutableStateOf(isHaveNotificationAccess)
     }
 
-    var isHaveAdminPermission by remember {
-        mutableStateOf(isHaveAdminAccess)
+    var isHaveStoragePermission by remember {
+        mutableStateOf(isHaveStorageAccess)
     }
 
-    var isHaveOverlayPerm by remember {
-        mutableStateOf(isHaveOverlayPermission)
+    var isHaveAccessibiltyServicePermission by remember {
+        mutableStateOf(isHaveAcessibiltyService)
+    }
+
+    var isHaveAdminPermission by remember {
+        mutableStateOf(isHaveAdminAccess)
     }
 
     var isIntroductionDone by remember {
@@ -126,10 +129,16 @@ fun SettingsScreen(
     LaunchedEffect(
         key1 = isHaveNotificationPermission,
         key2 = isHaveAdminPermission,
-        key3 = isHaveOverlayPerm
+        key3 = isHaveAccessibiltyServicePermission,
     ) {
-        if (isHaveAdminPermission && isHaveNotificationPermission && isHaveOverlayPerm)
-            onDone()
+        if (
+            isHaveAdminPermission && isHaveNotificationPermission && isHaveAccessibiltyServicePermission && isHaveStoragePermission) onDone()
+    }
+
+    LaunchedEffect(
+        key1 = isHaveStoragePermission
+    ) {
+        if (isHaveAdminPermission && isHaveNotificationPermission && isHaveAccessibiltyServicePermission && isHaveStoragePermission) onDone()
     }
 
 
@@ -137,7 +146,8 @@ fun SettingsScreen(
         if (event == Lifecycle.Event.ON_RESUME) {
             context.hasNotificationAccess().also { isHaveNotificationPermission = it }
             context.hasAdminPermission().also { isHaveAdminPermission = it }
-            context.hasOverlayPermission().also { isHaveOverlayPerm = it }
+            context.hasAccessibilityService().also { isHaveAccessibiltyServicePermission = it }
+            context.hasStorageAccess().also { isHaveStoragePermission = it }
         }
     }
 
@@ -191,59 +201,57 @@ fun SettingsScreen(
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
-            if (isNeedNotificaiton)
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            if (isHaveNotificationPermission) stringResource(R.string.notification_permission_granted)
-                            else stringResource(R.string.need_notification_permission)
-                        )
-                    },
-                    trailingContent = {
-                        if (isHaveNotificationPermission)
-                            Icon(
-                                Icons.Default.Check,
-                                tint = Color.White,
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .background(Green_4CAF50),
-                                contentDescription = null,
-                            )
-                        else
-                            Button(onClick = {
-                                context.requestNotificationAccess()
-                            }) {
-                                Text(text = stringResource(R.string.grant))
-                            }
-                    },
-                )
+            if (isNeedNotificaiton) ListItem(
+                headlineContent = {
+                    Text(
+                        if (isHaveNotificationPermission) stringResource(R.string.notification_permission_granted)
+                        else stringResource(R.string.need_notification_permission)
+                    )
+                },
+                trailingContent = {
+                    if (isHaveNotificationPermission) Icon(
+                        Icons.Default.Check,
+                        tint = Color.White,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Green_4CAF50),
+                        contentDescription = null,
+                    )
+                    else Button(onClick = {
+                        context.requestNotificationAccess()
+                    }) {
+                        Text(text = stringResource(R.string.grant))
+                    }
+                },
+            )
+
+
 
             ListItem(
                 headlineContent = {
                     Text(
-                        if (isHaveOverlayPerm) stringResource(R.string.overlay_permission_granted)
-                        else stringResource(R.string.need_overlay_permission)
+                        if (isHaveStoragePermission) "Storage Permission Granted"
+                        else "Need Storage Permission"
                     )
                 },
                 trailingContent = {
-                    if (isHaveOverlayPerm)
-                        Icon(
-                            Icons.Default.Check,
-                            tint = Color.White,
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(Green_4CAF50),
-                            contentDescription = null,
-                        )
-                    else
-                        Button(
-                            onClick = {
-                                context.openOverlayPermissionSetting()
-                            }) {
-                            Text(text = stringResource(id = R.string.grant))
-                        }
+                    if (isHaveStoragePermission) Icon(
+                        Icons.Default.Check,
+                        tint = Color.White,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Green_4CAF50),
+                        contentDescription = null,
+                    )
+                    else Button(onClick = {
+                        context.requestStorageAccess()
+                    }) {
+                        Text(text = stringResource(id = R.string.grant))
+                    }
                 },
             )
+
+
 
             ListItem(
                 headlineContent = {
@@ -253,22 +261,47 @@ fun SettingsScreen(
                     )
                 },
                 trailingContent = {
-                    if (isHaveAdminPermission)
-                        Icon(
-                            Icons.Default.Check,
-                            tint = Color.White,
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(Green_4CAF50),
-                            contentDescription = null,
-                        )
-                    else
-                        Button(
-                            onClick = {
-                                context.openAdminPermissionSetting()
-                            }) {
-                            Text(text = stringResource(id = R.string.grant))
+                    if (isHaveAdminPermission) Icon(
+                        Icons.Default.Check,
+                        tint = Color.White,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Green_4CAF50),
+                        contentDescription = null,
+                    )
+                    else Button(onClick = {
+                        context.openAdminPermissionSetting()
+                    }) {
+                        Text(text = stringResource(id = R.string.grant))
+                    }
+                },
+            )
+
+            ListItem(
+                headlineContent = {
+                    Text(
+                        if (isHaveAccessibiltyServicePermission) "Accessibility Service Permission Granted"
+                        else "Need Accessibility Service Permission"
+                    )
+                },
+                trailingContent = {
+                    if (isHaveAccessibiltyServicePermission) Icon(
+                        Icons.Default.Check,
+                        tint = Color.White,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Green_4CAF50),
+                        contentDescription = null,
+                    )
+                    else Button(onClick = {
+                        if(context.hasStorageAccess()){
+                            context.requestAccessibilityService()
+                        }else {
+                            Toast.makeText(context, "Please grant storage permission first", Toast.LENGTH_SHORT).show()
                         }
+                    }) {
+                        Text(text = stringResource(id = R.string.grant))
+                    }
                 },
             )
         }
@@ -278,8 +311,7 @@ fun SettingsScreen(
 @Composable
 @Preview(showBackground = true)
 fun InstructionComponent(
-    context: Context = LocalContext.current,
-    closeApp: () -> Unit = {}
+    context: Context = LocalContext.current, closeApp: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -290,10 +322,9 @@ fun InstructionComponent(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = stringResource(R.string.your_device_is) +
-                    (if(context.isManufactureAdditionalSetting())
-                        stringResource(R.string.almost) else "") +
-                    stringResource(R.string.ready_for_instant_lock),
+            text = stringResource(R.string.your_device_is) + (if (context.isManufactureAdditionalSetting()) stringResource(
+                R.string.almost
+            ) else "") + stringResource(R.string.ready_for_instant_lock),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
@@ -304,12 +335,12 @@ fun InstructionComponent(
                 .height(80.dp)
                 .clip(CircleShape),
             horizontalArrangement = Arrangement.Center
-        ){
+        ) {
             Card(
                 modifier = Modifier
                     .size(120.dp)
                     .clip(CircleShape)
-            ){
+            ) {
                 Image(
                     painter = painterResource(id = R.drawable.baseline_lock_clock_24),
                     contentDescription = null,
@@ -328,7 +359,11 @@ fun InstructionComponent(
             fontSize = 16.sp
         )
         Spacer(modifier = Modifier.height(32.dp))
-        Text(text = stringResource(R.string.operations), fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Text(
+            text = stringResource(R.string.operations),
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = stringResource(R.string.instruction_no_one), fontSize = 16.sp)
         Spacer(modifier = Modifier.height(8.dp))
@@ -339,15 +374,15 @@ fun InstructionComponent(
 
         Row(
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
             Icon(
                 modifier = Modifier.size(20.dp),
-                painter = painterResource(id = R.drawable.info_ic_24), contentDescription = null
+                painter = painterResource(id = R.drawable.info_ic_24),
+                contentDescription = null
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = stringResource(R.string.cannot_cancel_lock),
-                fontSize = 14.sp
+                text = stringResource(R.string.cannot_cancel_lock), fontSize = 14.sp
             )
         }
         if (context.isManufactureAdditionalSetting()) {
@@ -357,20 +392,18 @@ fun InstructionComponent(
 
         Spacer(modifier = Modifier.height(52.dp))
         Text(
-            modifier =  Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             text = stringResource(R.string.widget_will_reappear),
             fontSize = 14.sp
         )
         Button(
-            onClick = { closeApp() },
-            modifier = Modifier
+            onClick = { closeApp() }, modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp)
         ) {
             Text(
-                textAlign = TextAlign.Center,
-                text = stringResource(R.string.close_and_start)
+                textAlign = TextAlign.Center, text = stringResource(R.string.close_and_start)
             )
         }
     }
