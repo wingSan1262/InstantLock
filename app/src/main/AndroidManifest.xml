@@ -10,9 +10,17 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
 
+<!--    legacy external data system -->
+
+
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
     <application
         android:name=".MyApp"
         android:allowBackup="true"
+        android:requestLegacyExternalStorage="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -33,16 +41,29 @@
             </intent-filter>
         </activity>
 
-        <receiver
-            android:name=".feature.receivers.NightTimeReceiver"
-            android:exported="true"/>
-
-        <receiver android:name=".feature.receivers.PowerButtonReceiver"
-            android:exported="true">
+        <service
+            android:name=".feature.services.LockdownAcessibilityService"
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
-                <action android:name="android.intent.action.SCREEN_OFF" />
+                <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
-        </receiver>
+
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
+
+<!--        <receiver-->
+<!--            android:name=".feature.receivers.NightTimeReceiver"-->
+<!--            android:exported="true"/>-->
+
+<!--        <receiver android:name=".feature.receivers.PowerButtonReceiver"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.SCREEN_OFF" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
 
         <receiver android:name=".feature.receivers.PhonePowerOnReceiver"
             android:exported="true">

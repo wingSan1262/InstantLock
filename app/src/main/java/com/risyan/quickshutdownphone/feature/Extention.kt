@@ -38,6 +38,7 @@ import com.risyan.quickshutdownphone.data.SharedPrefApi
 import com.risyan.quickshutdownphone.feature.receivers.MyAdmin
 import com.risyan.quickshutdownphone.feature.receivers.NightTimeReceiver
 import com.risyan.quickshutdownphone.feature.receivers.ShutdownType
+import com.risyan.quickshutdownphone.feature.services.LockdownAcessibilityService
 import com.risyan.quickshutdownphone.feature.services.ReceiverSetupService
 import com.risyan.quickshutdownphone.feature.widget.LockWidget
 import kotlinx.coroutines.CoroutineScope
@@ -269,6 +270,42 @@ fun Context.hasNotificationAccess(): Boolean {
     return true
 }
 
+// Storeage Read and Write Access
+fun Context.hasStorageAccess(): Boolean {
+    return ContextCompat.checkSelfPermission(
+        this,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+        this,
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    ) == PackageManager.PERMISSION_GRANTED
+}
+
+fun Context.requestStorageAccess() {
+    ActivityCompat.requestPermissions(
+        this as ComponentActivity,
+        arrayOf(
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ),
+        101
+    )
+}
+
+fun Context.hasAccessibilityService(): Boolean {
+    val service = ComponentName(this, LockdownAcessibilityService::class.java)
+    val accessibilityManager =
+        getSystemService(Context.ACCESSIBILITY_SERVICE) as android.view.accessibility.AccessibilityManager
+    val enabledServices =
+        Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
+    return enabledServices?.contains(service.flattenToString()) == true
+}
+
+fun Context.requestAccessibilityService() {
+    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+    startActivity(intent)
+}
+
 fun Context.requestNotificationAccess() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         ActivityCompat.requestPermissions(
@@ -297,15 +334,6 @@ fun Context.hasAdminPermission(): Boolean {
     return devicePolicyManager.isAdminActive(compName)
 }
 
-fun Context.openOverlayPermissionSetting() {
-    val intent =
-        Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
-    startActivity(intent)
-}
-
-fun Context.hasOverlayPermission(): Boolean {
-    return Settings.canDrawOverlays(this)
-}
 
 @Composable
 fun OnLifecycleEvent(onEvent: (owner: LifecycleOwner, event: Lifecycle.Event) -> Unit) {

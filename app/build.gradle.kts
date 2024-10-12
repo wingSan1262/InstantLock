@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.cardview)
+    implementation("org.tensorflow:tensorflow-lite:2.11.0")
     testImplementation(libs.junit)
 
     implementation("com.google.code.gson:gson:2.8.8")
