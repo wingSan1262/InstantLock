@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
-
-
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.risyan.quickshutdownphone">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -44,6 +43,8 @@
         <service
             android:name=".feature.services.LockdownAcessibilityService"
             android:exported="true"
+            android:canTakeScreenshot="true"
+            android:foregroundServiceType="specialUse"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
@@ -65,13 +66,20 @@
 <!--            </intent-filter>-->
 <!--        </receiver>-->
 
-        <receiver android:name=".feature.receivers.PhonePowerOnReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-            </intent-filter>
-        </receiver>
+<!--        <receiver android:name=".feature.receivers.PowerButtonReceiver"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.SCREEN_OFF" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
+
+<!--        <receiver android:name=".feature.receivers.PhonePowerOnReceiver"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.BOOT_COMPLETED" />-->
+<!--                <action android:name="android.intent.action.QUICKBOOT_POWERON" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
 
         <receiver
             android:name=".feature.receivers.MyAdmin"

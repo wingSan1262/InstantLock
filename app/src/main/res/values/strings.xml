@@ -33,7 +33,7 @@
     <string name="cannot_cancel_lock">You cannot cancel the lock once started.</string>
     <string name="widget_will_reappear">Widget will reappear if missing.</string>
     <string name="close_and_start">Close and Start Using Lockdown</string>
-    <string name="instant_lockdown_is_ready">Instant Lockdown is ready</string>
+    <string name="instant_lockdown_is_ready">Instant Lockdown protection is ready</string>
     <string name="vivo_android_autostart">Vivo Android Autostart</string>
     <string name="vivo_enable_autostart_one">"You need to enable autostart for showing lock widget everytime phone turned on. "</string>
     <string name="vivo_enable_autostart_two">"Please click the button below to open the autostart settings. "</string>
@@ -52,4 +52,9 @@
     <string name="huawei_android_autostart">Huawei Android Autostart</string>
     <string name="open_huawei_auto_start_settings">Open Huawei Auto Start Settings</string>
     <string name="open_let_auto_start_settings">Open Let Auto Start Settings</string>
+    <string name="you_entered_the_forbidden_land">You entered the forbidden land!</string>
+    <string name="denied_bonk">You are being denied and bonked from entering your phone</string>
+    <string name="punishment_time_remaining">"Punishment time remaining: "</string>
+    <string name="woah_neuron_buster_everywhere">Woah! Neuron Buster Everywhere.</string>
+    <string name="neuron_bustor_message">Let me put you to safe place for some time ok. please close your app in mean time</string>
 </resources>
