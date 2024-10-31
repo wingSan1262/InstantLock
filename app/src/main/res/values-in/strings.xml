@@ -33,7 +33,7 @@
     <string name="cannot_cancel_lock">Anda tidak dapat membatalkan kunci setelah dimulai.</string>
     <string name="widget_will_reappear">Widget akan muncul kembali jika hilang.</string>
     <string name="close_and_start">Tutup dan Mulai Menggunakan Lockdown</string>
-    <string name="instant_lockdown_is_ready">Lockdown Instan siap</string>
+    <string name="instant_lockdown_is_ready">Perlindungan Instant Lockdown Siap</string>
     <string name="vivo_android_autostart">Autostart Android Vivo</string>
     <string name="vivo_enable_autostart_one">"Anda perlu mengaktifkan autostart untuk menampilkan widget kunci setiap kali telepon dinyalakan. "</string>
     <string name="vivo_enable_autostart_two">"Silakan klik tombol di bawah ini untuk membuka pengaturan autostart. "</string>

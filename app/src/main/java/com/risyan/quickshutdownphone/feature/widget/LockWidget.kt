@@ -6,11 +6,9 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.risyan.quickshutdownphone.databinding.LockWidgetOverlayBinding
-import com.risyan.quickshutdownphone.feature.receivers.ShutdownType
+import com.risyan.quickshutdownphone.feature.model.ShutdownType
 import kotlinx.coroutines.*
 
 
@@ -49,7 +47,7 @@ class LockWidget @JvmOverloads constructor(
 
             stopProgress()
             holdJob?.cancel()
-            if(holdType == ShutdownType.QUICK_5_MINUTES){
+            if(holdType == ShutdownType.QUICK_5_MINUTES_NFSW){
                 on2SecondHold()
             }else if(holdType == ShutdownType.LONG_20_MINUTES){
                 on4SecondHold()
@@ -71,7 +69,7 @@ class LockWidget @JvmOverloads constructor(
         holdJob = CoroutineScope(Dispatchers.Main).launch {
             while (isActive) {
                 delay(startProgress(1500).toLong())
-                holdType = ShutdownType.QUICK_5_MINUTES
+                holdType = ShutdownType.QUICK_5_MINUTES_NFSW
                 setProgressBarColor(Color.RED)
                 delay(startProgress(2000).toLong())
                 holdType = ShutdownType.LONG_20_MINUTES

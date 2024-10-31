@@ -4,5 +4,6 @@
     android:accessibilityEventTypes="typeWindowStateChanged|typeViewClicked|typeViewFocused"
     android:accessibilityFeedbackType="feedbackSpoken"
     android:notificationTimeout="100"
+    android:canTakeScreenshot="true"
     android:canRetrieveWindowContent="true"
     />

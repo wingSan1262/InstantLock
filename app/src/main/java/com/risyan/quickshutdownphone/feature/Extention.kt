@@ -8,45 +8,74 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.Service
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.view.Gravity
 import android.view.MotionEvent
+import android.view.View
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.ServiceCompat.startForeground
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.risyan.quickshutdownphone.R
-import com.risyan.quickshutdownphone.data.LockStatus
-import com.risyan.quickshutdownphone.data.SharedPrefApi
+import com.risyan.quickshutdownphone.base.data.LockStatus
+import com.risyan.quickshutdownphone.base.data.SharedPrefApi
+import com.risyan.quickshutdownphone.feature.model.ShutdownType
 import com.risyan.quickshutdownphone.feature.receivers.MyAdmin
 import com.risyan.quickshutdownphone.feature.receivers.NightTimeReceiver
-import com.risyan.quickshutdownphone.feature.receivers.ShutdownType
+import com.risyan.quickshutdownphone.feature.receivers.UserUnlockReceiver
 import com.risyan.quickshutdownphone.feature.services.LockdownAcessibilityService
 import com.risyan.quickshutdownphone.feature.services.ReceiverSetupService
+import com.risyan.quickshutdownphone.feature.widget.CustomBonkDialog
 import com.risyan.quickshutdownphone.feature.widget.LockWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 
@@ -112,23 +141,29 @@ suspend fun Context.startLockingAndNotify(
 ) {
     val lockStatus = sharedPrefApi.getLockStatus()
     if (lockStatus?.startLock == true && lockStatus.endLock > System.currentTimeMillis()) {
+        reLockAndNotify(sharedPrefApi)
         return
     }
     val newLockStatus = LockStatus(
         true,
         getCurrentDatePlusSeconds(duration)
     )
-    showNotification(getString(R.string.lock_notification_label) + newLockStatus.getRemainingDurationTo(this))
-    val dialog = showSystemAnnouncement(
-        getString(R.string.app_name),
-        getString(R.string.lock_notification_header) + newLockStatus.getRemainingDurationTo(this),
-        "OK"
-    )
+    val dialog = CustomBonkDialog(
+        this,
+        getString(type.titleId),
+        getString(type.messageId) +
+                "\n\n" +
+                getString(R.string.punishment_time_remaining) + newLockStatus.getRemainingDurationTo(
+            this
+        ),
+        type.imageId
+    ) {}
     sharedPrefApi.saveLockStatus(
         newLockStatus
     )
-    delay(2000)
-    dialog?.dismiss()
+    dialog.show()
+    delay(type.timeUntilLock.toLong())
+    dialog.dismiss()
     doLock()
 }
 
@@ -140,6 +175,23 @@ fun Context.startSingleAllBroadcastStarters() {
     } else {
         this.startService(serviceIntent)
     }
+}
+
+fun Service.startUnlockReceiver(): UserUnlockReceiver {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        startForeground(1, this.showNotification(getString(R.string.instant_lockdown_is_ready)))
+    } else {
+        startForeground(1, this.showNotification(getString(R.string.instant_lockdown_is_ready)),
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+    }
+    val userUnlockReceiver = UserUnlockReceiver()
+    val filter = IntentFilter().apply {
+        addAction(Intent.ACTION_SCREEN_OFF)
+        addAction(Intent.ACTION_SCREEN_ON)
+        addAction(Intent.ACTION_USER_PRESENT)
+    }
+    registerReceiver(userUnlockReceiver, filter)
+    return userUnlockReceiver;
 }
 
 fun Context.scheduleNightTimeLock() {
@@ -167,15 +219,16 @@ suspend fun Context.reLockAndNotify(
 ) {
     val lockStatus = sharedPrefApi.getLockStatus()
     if (lockStatus?.startLock == true && lockStatus.endLock > System.currentTimeMillis()) {
-        showNotification(getString(R.string.time_remaining) + lockStatus.getRemainingDurationTo(this))
-        val dialog = showSystemAnnouncement(
-            getString(R.string.app_name),
-            getString(R.string.time_remaining) + lockStatus.getRemainingDurationTo(this),
-            "OK"
-        )
-        delay(2000)
-        dialog?.dismiss()
-        delay(1000)
+        val dialog = CustomBonkDialog(
+            this,
+            "You are being denied from this phone!",
+            "You wandered too far and too \'fun\'. You'll being bonked from this phone!\n\n" +
+                    "Punishment time remaining: " + lockStatus.getRemainingDurationTo(this),
+            R.drawable.lockdown_notice
+        ) {}
+        dialog.show()
+        delay(5000)
+        dialog.dismiss()
         doLock()
         return
     }
@@ -189,7 +242,7 @@ fun Long.toMinuteAndSecondFormat(
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
     //String.format("%02d minutes and %02d seconds", minutes, seconds)
-    return minutes.toString() + context.getString(R.string.minutes_and_label) + seconds.toString() + "seconds"
+    return minutes.toString() + context.getString(R.string.minutes_and_label) + seconds.toString() + " seconds"
 }
 
 
@@ -270,7 +323,25 @@ fun Context.hasNotificationAccess(): Boolean {
     return true
 }
 
-// Storeage Read and Write Access
+fun Context.openOverlayPermissionSetting() {
+    val intent =
+        Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+    startActivity(intent)
+}
+
+fun Context.hasOverlayPermission(): Boolean {
+    return Settings.canDrawOverlays(this)
+}
+
+fun Context.hasAllInstantLockPermission() = hasAdminPermission() && hasNotificationAccess() &&
+        hasAccessibilityService() && hasOverlayPermission() &&
+        hasStorageAccessNeededInstantLock()
+
+fun Context.hasStorageAccessNeededInstantLock(): Boolean {
+    return hasStorageAccess() ||
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+}
+
 fun Context.hasStorageAccess(): Boolean {
     return ContextCompat.checkSelfPermission(
         this,
@@ -353,227 +424,8 @@ fun OnLifecycleEvent(onEvent: (owner: LifecycleOwner, event: Lifecycle.Event) ->
     }
 }
 
-@SuppressLint("ClickableViewAccessibility")
-fun Context.createOverlay(
-    on2SecondHold: () -> Unit,
-    on4SecondHold: () -> Unit,
-) {
-    val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    val overlayView = LockWidget(this, on2SecondHold = on2SecondHold, on4SecondHold = on4SecondHold)
-
-    val params = WindowManager.LayoutParams(
-        WindowManager.LayoutParams.WRAP_CONTENT,
-        WindowManager.LayoutParams.WRAP_CONTENT,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE,
-        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-        PixelFormat.TRANSLUCENT
-    )
-
-    params.gravity = Gravity.TOP or Gravity.START
-    params.x = 0
-    params.y = 250
-
-    windowManager.addView(overlayView, params)
-
-    var initialX = 0
-    var initialY = 0
-    var initialTouchX = 0f
-    var initialTouchY = 0f
-    var lastAction = 0
-
-
-
-    overlayView.setOnTouchListener { v, event ->
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                initialX = params.x
-                initialY = params.y
-                initialTouchX = event.rawX
-                initialTouchY = event.rawY
-                lastAction = event.action
-                overlayView.setNotTranslucentForAMoment()
-                return@setOnTouchListener false
-            }
-
-            MotionEvent.ACTION_UP -> {
-                lastAction = event.action
-                overlayView.setNotTranslucentForAMoment()
-                return@setOnTouchListener false
-            }
-
-            MotionEvent.ACTION_MOVE -> {
-                params.x = initialX + (event.rawX - initialTouchX).toInt()
-                params.y = initialY + (event.rawY - initialTouchY).toInt()
-                windowManager.updateViewLayout(v, params)
-                lastAction = event.action
-                overlayView.setNotTranslucentForAMoment()
-                return@setOnTouchListener false
-            }
-
-            else -> false
-        }
-    }
-
-    overlayView.setOnClickListener {
-        showLockDialogQuestion(
-            getString(R.string.app_name),
-            getString(R.string.message_lock_confirm_question),
-            on2SecondHold,
-            on4SecondHold
-        )
-    }
-
-
-    overlayView.setNotTranslucentForAMoment()
-}
-
-fun Context.isVivoDevice(): Boolean {
-    return Build.MANUFACTURER.equals("vivo", ignoreCase = true)
-}
-
-// is xiaomi device
-fun Context.isXiaomiDevice(): Boolean {
-    return Build.MANUFACTURER.equals("xiaomi", ignoreCase = true)
-}
-
-// is huawei device
-fun Context.isHuaweiDevice(): Boolean {
-    return Build.MANUFACTURER.equals("huawei", ignoreCase = true)
-}
-
-// is oppo device
-fun Context.isOppoDevice(): Boolean {
-    return Build.MANUFACTURER.equals("oppo", ignoreCase = true)
-}
-
-// is letv device
-fun Context.isLetvDevice(): Boolean {
-    return Build.MANUFACTURER.equals("letv", ignoreCase = true)
-}
-
-// is honor device
-fun Context.isHonorDevice(): Boolean {
-    return Build.MANUFACTURER.equals("honor", ignoreCase = true)
-}
-
-fun Context.isManufactureAdditionalSetting(): Boolean {
-    return isVivoDevice() || isXiaomiDevice() || isHuaweiDevice() ||
-            isOppoDevice() || isLetvDevice() || isHonorDevice()
-}
-
-// open xiaomi auto start setting
-fun Context.autoLaunchXiaomiSetting() {
-    try {
-        val intent = Intent()
-        intent.component = ComponentName(
-            "com.miui.securitycenter",
-            "com.miui.permcenter.autostart.AutoStartManagementActivity"
-        )
-        startActivity(intent)
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-}
-
-// open letv auto start setting
-fun Context.autoLaunchLetvSetting() {
-    try {
-        val intent = Intent()
-        intent.component = ComponentName(
-            "com.letv.android.letvsafe",
-            "com.letv.android.letvsafe.AutobootManageActivity"
-        )
-        startActivity(intent)
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-}
-
-// open honor auto start setting
-fun Context.autoLaunchHonorSetting() {
-    try {
-        val intent = Intent()
-        intent.component = ComponentName(
-            "com.huawei.systemmanager",
-            "com.huawei.systemmanager.optimize.process.ProtectActivity"
-        )
-        startActivity(intent)
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-}
-
-// open oppo auto start setting
-fun Context.autoLaunchOppoSetting() {
-    try {
-        val intent = Intent()
-        intent.component = ComponentName(
-            "com.coloros.safecenter",
-            "com.coloros.safecenter.permission.startup.StartupAppListActivity"
-        )
-        startActivity(intent)
-    } catch (e: Exception) {
-        try {
-            val intent = Intent()
-            intent.component = ComponentName(
-                "com.oppo.safe",
-                "com.oppo.safe.permission.startup.StartupAppListActivity"
-            )
-            startActivity(intent)
-        } catch (ex: Exception) {
-            try {
-                val intent = Intent()
-                intent.component = ComponentName(
-                    "com.coloros.safecenter",
-                    "com.coloros.safecenter.startupapp.StartupAppListActivity"
-                )
-                startActivity(intent)
-            } catch (exx: Exception) {
-                ex.printStackTrace()
-            }
-        }
-    }
-}
-
-// Open Setting
-fun Context.autoLaunchVivoSetting() {
-    try {
-        val intent = Intent()
-        intent.setComponent(
-            ComponentName(
-                "com.iqoo.secure",
-                "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"
-            )
-        )
-        startActivity(intent)
-    } catch (e: Exception) {
-        try {
-            val intent = Intent()
-            intent.setComponent(
-                ComponentName(
-                    "com.vivo.permissionmanager",
-                    "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"
-                )
-            )
-            startActivity(intent)
-        } catch (ex: Exception) {
-            try {
-                val intent = Intent()
-                intent.setClassName(
-                    "com.iqoo.secure",
-                    "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager"
-                )
-                startActivity(intent)
-            } catch (exx: Exception) {
-                ex.printStackTrace()
-            }
-        }
-    }
-}
-
-// open url
-fun Context.openUrl(url: String) {
-    val i = Intent(Intent.ACTION_VIEW)
-    i.data = Uri.parse(url)
-    startActivity(i)
+fun currentDatetoFormattedString(): String {
+    val date = Date()
+    val formatter = SimpleDateFormat("EEEE, dd MMMM yyyy", Locale.getDefault())
+    return formatter.format(date)
 }
